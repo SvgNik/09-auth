@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { register } from "@/lib/api/clientApi";
-import { useAuthStore } from "@/lib/store/authStore";
 import Link from "next/link";
 import { AxiosError } from "axios";
-import css from "./SignUpPage.module.css";
+import { login } from "@/lib/api/clientApi";
+import { useAuthStore } from "@/lib/store/authStore";
+import css from "./SignInPage.module.css";
 
-export default function SignUpPage() {
+export default function SignInPage() {
   const router = useRouter();
   const setUser = useAuthStore((state) => state.setUser);
   const [error, setError] = useState("");
@@ -22,35 +22,57 @@ export default function SignUpPage() {
     };
 
     try {
-      const user = await register(data);
+      const user = await login(data);
       setUser(user);
       router.push("/profile");
     } catch (err) {
-      const error = err as AxiosError<{ message: string }>;
-      setError(error.response?.data?.message || "Registration failed");
+      const axiosError = err as AxiosError<{ message: string }>;
+      setError(axiosError.response?.data?.message || "Login failed");
     }
   };
 
   return (
-    <main className={css.mainContent || "container"}>
-      <form className={css.form || "form"} onSubmit={handleSubmit}>
-        <h1>Sign up</h1>
-
-        <div>
+    <main className={css.mainContent}>
+      <form className={css.form} onSubmit={handleSubmit}>
+        <h1 className={css.formTitle}>Sign in</h1>
+        <div className={css.formGroup}>
           <label htmlFor="email">Email</label>
-          <input id="email" type="email" name="email" required />
+          <input
+            id="email"
+            type="email"
+            name="email"
+            className={css.input}
+            required
+          />
         </div>
-
-        <div>
+        <div className={css.formGroup}>
           <label htmlFor="password">Password</label>
-          <input id="password" type="password" name="password" required />
+          <input
+            id="password"
+            type="password"
+            name="password"
+            className={css.input}
+            required
+          />
         </div>
+        <div className={css.actions}>
+          <button type="submit" className={css.submitButton}>
+            Log in
+          </button>
+        </div>
+        {error && <p className={css.error}>{error}</p>}
 
-        <button type="submit">Register</button>
-        {error && <p style={{ color: "red" }}>{error}</p>}
-
-        <p>
-          Already have an account? <Link href="/sign-in">Sign in</Link>
+        <p
+          className={css.redirectText}
+          style={{ marginTop: "15px", textAlign: "center" }}
+        >
+          Don&apos;t have an account?{" "}
+          <Link
+            href="/sign-up"
+            style={{ color: "blue", textDecoration: "underline" }}
+          >
+            Sign up
+          </Link>
         </p>
       </form>
     </main>
