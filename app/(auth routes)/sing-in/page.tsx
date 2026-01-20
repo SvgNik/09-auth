@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { login } from "@/lib/api/clientApi";
+import { register } from "@/lib/api/clientApi";
 import { useAuthStore } from "@/lib/store/authStore";
-import css from "./SignInPage.module.css";
+import Link from "next/link";
+import { AxiosError } from "axios";
+import css from "./SignUpPage.module.css";
 
-export default function SignInPage() {
+export default function SignUpPage() {
   const router = useRouter();
   const setUser = useAuthStore((state) => state.setUser);
   const [error, setError] = useState("");
@@ -14,47 +16,42 @@ export default function SignInPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const data = Object.fromEntries(formData.entries());
+    const data = {
+      email: formData.get("email") as string,
+      password: formData.get("password") as string,
+    };
 
     try {
-      const user = await login(data);
+      const user = await register(data);
       setUser(user);
       router.push("/profile");
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Login failed");
+    } catch (err) {
+      const error = err as AxiosError<{ message: string }>;
+      setError(error.response?.data?.message || "Registration failed");
     }
   };
 
   return (
-    <main className={css.mainContent}>
-      <form className={css.form} onSubmit={handleSubmit}>
-        <h1 className={css.formTitle}>Sign in</h1>
-        <div className={css.formGroup}>
+    <main className={css.mainContent || "container"}>
+      <form className={css.form || "form"} onSubmit={handleSubmit}>
+        <h1>Sign up</h1>
+
+        <div>
           <label htmlFor="email">Email</label>
-          <input
-            id="email"
-            type="email"
-            name="email"
-            className={css.input}
-            required
-          />
+          <input id="email" type="email" name="email" required />
         </div>
-        <div className={css.formGroup}>
+
+        <div>
           <label htmlFor="password">Password</label>
-          <input
-            id="password"
-            type="password"
-            name="password"
-            className={css.input}
-            required
-          />
+          <input id="password" type="password" name="password" required />
         </div>
-        <div className={css.actions}>
-          <button type="submit" className={css.submitButton}>
-            Log in
-          </button>
-        </div>
-        {error && <p className={css.error}>{error}</p>}
+
+        <button type="submit">Register</button>
+        {error && <p style={{ color: "red" }}>{error}</p>}
+
+        <p>
+          Already have an account? <Link href="/sign-in">Sign in</Link>
+        </p>
       </form>
     </main>
   );
