@@ -1,6 +1,7 @@
-import { api } from './api';
-import { User } from '@/types/user';
-import { cookies } from 'next/headers';
+import { api } from "./api";
+import { Note } from "@/types/note";
+import { User } from "@/types/user";
+import { cookies } from "next/headers";
 
 const getAuthHeaders = async () => {
   const cookieStore = await cookies();
@@ -11,12 +12,32 @@ const getAuthHeaders = async () => {
   };
 };
 
+export const fetchNotesServer = async (params = { perPage: 12 }) => {
+  try {
+    const headers = await getAuthHeaders();
+    const response = await api.get<Note[]>("/notes", { ...headers, params });
+    return response.data;
+  } catch {
+    return [];
+  }
+};
+
+export const fetchNoteByIdServer = async (id: string) => {
+  try {
+    const headers = await getAuthHeaders();
+    const response = await api.get<Note>(`/notes/${id}`, headers);
+    return response.data;
+  } catch {
+    return null;
+  }
+};
+
 export const getMeServer = async () => {
   try {
     const headers = await getAuthHeaders();
-    const response = await api.get<User>('/users/me', headers);
+    const response = await api.get<User>("/users/me", headers);
     return response.data;
-  } catch (error) {
+  } catch {
     return null;
   }
 };
@@ -24,9 +45,9 @@ export const getMeServer = async () => {
 export const checkSessionServer = async () => {
   try {
     const headers = await getAuthHeaders();
-    const response = await api.get<User | null>('/auth/session', headers);
+    const response = await api.get<User | null>("/auth/session", headers);
     return response.data;
-  } catch (error) {
+  } catch {
     return null;
   }
 };
