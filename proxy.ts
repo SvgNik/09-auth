@@ -12,13 +12,6 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/sign-in", request.url));
   }
 
-  if (
-    session &&
-    (pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up"))
-  ) {
-    return NextResponse.redirect(new URL("/profile", request.url));
-  }
-
   return NextResponse.next();
 }
 
