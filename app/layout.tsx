@@ -1,5 +1,5 @@
+import TanStackProvider from "@/components/TanStackProvider";
 import AuthProvider from "@/components/AuthProvider/AuthProvider";
-import "./globals.css";
 
 export default function RootLayout({
   children,
@@ -9,7 +9,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <AuthProvider>{children}</AuthProvider>
+        <TanStackProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </TanStackProvider>
       </body>
     </html>
   );

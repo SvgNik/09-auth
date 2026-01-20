@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useAuthStore } from "@/lib/store/authStore";
@@ -10,11 +11,21 @@ import css from "./EditProfilePage.module.css";
 export default function EditProfilePage() {
   const router = useRouter();
   const { user, setUser } = useAuthStore();
-  const [username, setUsername] = useState(user?.username || "");
 
-  useEffect(() => {
-    if (user) setUsername(user.username);
-  }, [user]);
+  if (!user) return null;
+
+  return (
+    <EditProfileForm
+      user={user}
+      setUser={setUser}
+      router={router}
+      key={user.email}
+    />
+  );
+}
+
+function EditProfileForm({ user, setUser, router }: any) {
+  const [username, setUsername] = useState(user.username || "");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,8 +37,6 @@ export default function EditProfilePage() {
       console.error("Update failed", error);
     }
   };
-
-  if (!user) return null;
 
   return (
     <main className={css.mainContent}>
