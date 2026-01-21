@@ -15,7 +15,8 @@
       {
         "ignore": [
           "text-wrap",
-          "text-wrap: balance"
+          "text-wrap: balance",
+          "user-select"
         ]
       }
     ]

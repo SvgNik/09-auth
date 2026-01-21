@@ -1,20 +1,24 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-export function proxy(request: NextRequest) {
+export default function middleware(request: NextRequest) {
   const session = request.cookies.get("session");
   const { pathname } = request.nextUrl;
 
-  if (
-    !session &&
-    (pathname.startsWith("/profile") || pathname.startsWith("/notes"))
-  ) {
+  if (!session && pathname.startsWith("/notes")) {
     return NextResponse.redirect(new URL("/sign-in", request.url));
+  }
+
+  if (
+    session &&
+    (pathname === "/sign-in" || pathname === "/sign-up" || pathname === "/")
+  ) {
+    return NextResponse.redirect(new URL("/notes", request.url));
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/profile/:path*", "/notes/:path*", "/sign-in", "/sign-up"],
+  matcher: ["/", "/notes/:path*", "/sign-in", "/sign-up"],
 };

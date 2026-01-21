@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
@@ -6,13 +5,21 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useAuthStore } from "@/lib/store/authStore";
 import { updateMe } from "@/lib/api/clientApi";
+import { User } from "@/types/user";
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import css from "./EditProfilePage.module.css";
+
+interface EditProfileFormProps {
+  user: User;
+  setUser: (user: User) => void;
+  router: AppRouterInstance;
+}
 
 export default function EditProfilePage() {
   const router = useRouter();
   const { user, setUser } = useAuthStore();
 
-  if (!user) return null;
+  if (!user) return <p className={css.loading}>Завантаження даних...</p>;
 
   return (
     <EditProfileForm
@@ -24,35 +31,47 @@ export default function EditProfilePage() {
   );
 }
 
-function EditProfileForm({ user, setUser, router }: any) {
+function EditProfileForm({ user, setUser, router }: EditProfileFormProps) {
   const [username, setUsername] = useState(user.username || "");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
+
     try {
       const updatedUser = await updateMe({ username });
       setUser(updatedUser);
       router.push("/profile");
+      router.refresh();
     } catch (error) {
       console.error("Update failed", error);
+      alert("Не вдалося оновити профіль.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <main className={css.mainContent}>
       <div className={css.profileCard}>
-        <h1 className={css.formTitle}>Edit Profile</h1>
-        <Image
-          src={user.avatar}
-          alt="Avatar"
-          width={120}
-          height={120}
-          className={css.avatar}
-        />
+        <h1 className={css.formTitle}>Редагувати профіль</h1>
 
-        <form className={css.profileInfo} onSubmit={handleSubmit}>
-          <div className={css.usernameWrapper}>
-            <label htmlFor="username">Username:</label>
+        <div className={css.avatarWrapper}>
+          <Image
+            src={user.avatar || "/default-avatar.png"}
+            alt="Avatar"
+            width={120}
+            height={120}
+            className={css.avatar}
+          />
+        </div>
+
+        <form className={css.form} onSubmit={handleSubmit}>
+          <div className={css.field}>
+            <label htmlFor="username" className={css.label}>
+              Ім&apos;я користувача
+            </label>
             <input
               id="username"
               type="text"
@@ -62,17 +81,27 @@ function EditProfileForm({ user, setUser, router }: any) {
               required
             />
           </div>
-          <p>Email: {user.email}</p>
+
+          <div className={css.field}>
+            <label className={css.label}>Email</label>
+            <p className={css.emailText}>{user.email}</p>
+          </div>
+
           <div className={css.actions}>
-            <button type="submit" className={css.saveButton}>
-              Save
+            <button
+              type="submit"
+              className={css.saveButton}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Збереження..." : "Зберегти"}
             </button>
             <button
               type="button"
               className={css.cancelButton}
               onClick={() => router.back()}
+              disabled={isSubmitting}
             >
-              Cancel
+              Скасувати
             </button>
           </div>
         </form>

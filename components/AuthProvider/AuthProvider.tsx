@@ -9,7 +9,7 @@ export default function AuthProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const { setUser, clearIsAuthenticated } = useAuthStore();
+  const { setUser } = useAuthStore();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -19,18 +19,22 @@ export default function AuthProvider({
         if (user) {
           setUser(user);
         } else {
-          clearIsAuthenticated();
+          setUser(null);
         }
-      } catch {
-        clearIsAuthenticated();
+      } catch (error) {
+        console.error("Помилка ініціалізації авторизації:", error);
+        setUser(null);
       } finally {
         setIsLoading(false);
       }
     };
-    initAuth();
-  }, [setUser, clearIsAuthenticated]);
 
-  if (isLoading) return <p>Loading...</p>;
+    initAuth();
+  }, [setUser]);
+
+  if (isLoading) {
+    return null;
+  }
 
   return <>{children}</>;
 }
