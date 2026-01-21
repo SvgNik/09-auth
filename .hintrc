@@ -10,15 +10,6 @@
         "list": "off"
       }
     ],
-    "compat-api/css": [
-      "default",
-      {
-        "ignore": [
-          "text-wrap",
-          "text-wrap: balance",
-          "user-select"
-        ]
-      }
-    ]
+    "compat-api/css": "off"
   }
 }
